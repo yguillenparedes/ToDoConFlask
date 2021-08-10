@@ -1,45 +1,39 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-import os
-from flask import Flask, request, jsonify, url_for
-from flask_migrate import Migrate
-from flask_swagger import swagger
-from flask_cors import CORS
-from utils import APIException, generate_sitemap
-from admin import setup_admin
+from flask import Flask, request, jsonify
 from models import db, User
 #from models import Person
 
 app = Flask(__name__)
-app.url_map.strict_slashes = False
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://yraidaguillen:superadmin...@85.10.205.173:3306/yg_todolist"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-MIGRATE = Migrate(app, db)
-db.init_app(app)
-CORS(app)
-setup_admin(app)
-
-# Handle/serialize errors like a JSON object
-@app.errorhandler(APIException)
-def handle_invalid_usage(error):
-    return jsonify(error.to_dict()), error.status_code
+#db.init_app(app)
 
 # generate sitemap with all your endpoints
-@app.route('/')
-def sitemap():
-    return generate_sitemap(app)
+@app.route('/') #Esto es un decorador
+def home():
+    return jsonify({"mensaje":"Bienvenidos a mi app"})
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+@app.route('/tareas', methods=['GET','PUT'])
+def obtener_tareas():
+    if request.method == 'GET':
+        return jsonify({"mensaje_via_get":"Bienvenidos a mi app GET"})
+    if request.method == 'PUT':
+        return jsonify({"mensaje_via_put":"Bienvenidos a mi app PUT"})
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+@app.route('/tareas', methods=['POST'])
+def obtener_tareas_post():
+    return jsonify({"mensaje_via_post":"Bienvenidos a mi app POST"})
 
-    return jsonify(response_body), 200
+#@app.route('/tareas', methods=['PUT'])
+#def obtener_tareas_put():
+    #return jsonify({"mensaje_via_put":"Bienvenidos a mi app PUT"})
+
+@app.route('/tareas', methods=['DELETE'])
+def obtener_tareas_delete():
+    return jsonify({"mensaje_via_delete":"Bienvenidos a mi app DELETE"})
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
-    PORT = int(os.environ.get('PORT', 3000))
-    app.run(host='0.0.0.0', port=PORT, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=True)
